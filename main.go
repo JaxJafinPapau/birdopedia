@@ -7,11 +7,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func main() {
+func newRouter() *mux.Router {
 	r := mux.NewRouter()
 	// The 'HandleFunc' method accepts both a path and a function as arguments
 	// The handler function must have the appropriate signature, see handler function
 	r.HandleFunc("/hello", handler).Methods("GET")
+	return r
+}
+func main() {
+	// This is a constructor function which calls `newRouter`
+	r := newRouter()
 
 	http.ListenAndServe(":8080", r)
 }
