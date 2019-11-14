@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -35,3 +36,31 @@ func TestHandler(t *testing.T) {
 }
 
 // The recorder is like a mini-browser, it accepts the result of the request
+func TestRouter(t *testing.T) {
+	r := newRouter()
+	mockServer := httptest.NewServer(r)
+
+	resp, err := http.Get(mockServer.URL + "/hello")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Status should be ok, got %d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	respString := string(b)
+	expected := "Hello, world!"
+
+	if respString != expected {
+		t.Errorf("Response should be %s, got %s", expected, respString)
+	}
+}
