@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	s "strings"
 	"testing"
 )
 
@@ -58,7 +59,7 @@ func TestRouter(t *testing.T) {
 	}
 
 	respString := string(b)
-	expected := "Hello, world!"
+	expected := "Hello, World!"
 
 	if respString != expected {
 		t.Errorf("Response should be %s, got %s", expected, respString)
@@ -66,7 +67,7 @@ func TestRouter(t *testing.T) {
 }
 
 // sad path
-func TestRouterForNonExistentRoute(t *testing.T) {
+func TestRouterForBadMethodOnExistingRoute(t *testing.T) {
 	r := newRouter()
 	mockServer := httptest.NewServer(r)
 
@@ -90,5 +91,32 @@ func TestRouterForNonExistentRoute(t *testing.T) {
 
 	if respString != expected {
 		t.Errorf("Response should be %s, got %s", expected, respString)
+	}
+}
+func TestRouterForNonExistentRoute(t *testing.T) {
+	r := newRouter()
+	mockServer := httptest.NewServer(r)
+
+	resp, err := http.Post(mockServer.URL+"/fuzzywuzzywuzabear", "", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp.StatusCode != 404 {
+		t.Errorf("Status should be 404, got %d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	respString := string(b)
+	received := s.Replace(respString, "\n", "", -1)
+	expected := "404 page not found"
+
+	if received != expected {
+		t.Errorf("Response should be %s, got %s", expected, received)
 	}
 }
