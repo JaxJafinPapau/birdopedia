@@ -139,3 +139,23 @@ func TestStaticFileServer(t *testing.T) {
 		t.Errorf("Wrong content type, expected %s, got %s", expectedContentType, contentType)
 	}
 }
+
+func TestGetBirdHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/bird", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+
+	hf := http.HandlerFunc(getBirdHandler)
+
+	hf.ServeHTTP(recorder, req)
+
+	status := recorder.Code
+
+	if status != http.StatusOK {
+		t.Errorf("Status should be 200, got %d", status)
+	}
+}
