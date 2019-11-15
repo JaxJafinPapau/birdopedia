@@ -103,7 +103,7 @@ func TestRouterForNonExistentRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.StatusCode != 404 {
+	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("Status should be 404, got %d", resp.StatusCode)
 	}
 
