@@ -12,6 +12,9 @@ func newRouter() *mux.Router {
 	// The 'HandleFunc' method accepts both a path and a function as arguments
 	// The handler function must have the appropriate signature, see handler function
 	r.HandleFunc("/hello", handler).Methods("GET")
+	staticFileDirectory := http.Dir("./assets/")
+	staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
+	r.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
 	return r
 }
 func main() {
