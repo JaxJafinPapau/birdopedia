@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	s "strings"
 	"testing"
 )
@@ -156,6 +157,27 @@ func TestGetBirdHandler(t *testing.T) {
 	status := recorder.Code
 
 	if status != http.StatusOK {
+		t.Errorf("Status should be 200, got %d", status)
+	}
+}
+
+func TestCreateBirdHandler(t *testing.T) {
+	body := strings.NewReader("species=dodo&description=a dumb extinct bird")
+	req, err := http.NewRequest("POST", "/bird", body)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+
+	hf := http.HandlerFunc(createBirdHandler)
+
+	hf.ServeHTTP(recorder, req)
+
+	status := recorder.Code
+
+	if status != http.StatusFound {
 		t.Errorf("Status should be 200, got %d", status)
 	}
 }
