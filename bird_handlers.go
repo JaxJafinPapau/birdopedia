@@ -9,7 +9,7 @@ import (
 //definition of a bird struct (bird json object?)
 type Bird struct {
 	Species     string `json:"species"`
-	Description string `json:description"`
+	Description string `json:"description"`
 }
 
 // common birds variable
