@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	s "strings"
 	"testing"
 )
@@ -103,7 +104,7 @@ func TestRouterForNonExistentRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.StatusCode != 404 {
+	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("Status should be 404, got %d", resp.StatusCode)
 	}
 
@@ -137,5 +138,47 @@ func TestStaticFileServer(t *testing.T) {
 
 	if expectedContentType != contentType {
 		t.Errorf("Wrong content type, expected %s, got %s", expectedContentType, contentType)
+	}
+}
+
+func TestGetBirdHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/bird", nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+
+	hf := http.HandlerFunc(getBirdHandler)
+
+	hf.ServeHTTP(recorder, req)
+
+	status := recorder.Code
+
+	if status != http.StatusOK {
+		t.Errorf("Status should be 200, got %d", status)
+	}
+}
+
+func TestCreateBirdHandler(t *testing.T) {
+	body := strings.NewReader("species=dodo&description=a dumb extinct bird")
+	req, err := http.NewRequest("POST", "/bird", body)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+
+	hf := http.HandlerFunc(createBirdHandler)
+
+	hf.ServeHTTP(recorder, req)
+
+	status := recorder.Code
+
+	if status != http.StatusFound {
+		t.Errorf("Status should be 200, got %d", status)
 	}
 }
