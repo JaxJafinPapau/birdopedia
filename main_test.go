@@ -164,6 +164,7 @@ func TestGetBirdHandler(t *testing.T) {
 func TestCreateBirdHandler(t *testing.T) {
 	body := strings.NewReader("species=dodo&description=a dumb extinct bird")
 	req, err := http.NewRequest("POST", "/bird", body)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
 	if err != nil {
 		t.Fatal(err)
