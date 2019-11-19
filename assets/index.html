@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <head>
+    <meta charset="UTF-8">
     <title>The bird encyclopedia. With an o.</title>
 </head>
 
@@ -11,8 +12,10 @@
             <th>Species</th>
             <th>Description</th>
         </tr>
-        <td>Pigeon</td>
-        <td>Common in cities</td>
+        <tr>
+            <td>Pigeon</td>
+            <td>Common in cities</td>
+        </tr>
     </table>
     <br/>
     <form action="/bird" method="post">
@@ -24,7 +27,7 @@
         <input type="submit" value="Submit">
     </form>
     <script>
-        birdTable = document.querySelector("table")
+        var birdTable = document.querySelector("table")
         fetch("/bird")
             .then(response => response.json())
             .then(birdList => {
@@ -34,7 +37,6 @@
                     species.innerHTML = bird.species
                     description = document.createElement("td")
                     description.innerHTML = bird.description
-
                     row.appendChild(species)
                     row.appendChild(description)
                     birdTable.appendChild(row)
