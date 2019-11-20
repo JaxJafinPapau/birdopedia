@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"net/url"
+	"strconv"
 	s "strings"
 	"testing"
 )
@@ -141,8 +144,13 @@ func TestStaticFileServer(t *testing.T) {
 	}
 }
 
-func TestGetBirdHandler(t *testing.T) {
-	req, err := http.NewRequest("GET", "/bird", nil)
+func TestGetBirdsHandler(t *testing.T) {
+	mockStore := InitMockStore()
+
+	mockStore.On("GetBirds").Return([]*Bird{
+		{"sparrow", "a small harmless bird"},
+	}, nil).Once()
+	req, err := http.NewRequest("GET", "/birds", nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -150,7 +158,7 @@ func TestGetBirdHandler(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 
-	hf := http.HandlerFunc(getBirdHandler)
+	hf := http.HandlerFunc(getBirdsHandler)
 
 	hf.ServeHTTP(recorder, req)
 
@@ -159,12 +167,37 @@ func TestGetBirdHandler(t *testing.T) {
 	if status != http.StatusOK {
 		t.Errorf("Status should be 200, got %d", status)
 	}
+
+	expected := Bird{"sparrow", "a small harmless bird"}
+	birdList := []Bird{}
+	err = json.NewDecoder(recorder.Body).Decode(&birdList)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual := birdList[0]
+
+	if actual != expected {
+		t.Errorf("unexpected body, got %v want %v", actual, expected)
+	}
+
+	mockStore.AssertExpectations(t)
 }
 
 func TestCreateBirdHandler(t *testing.T) {
-	body := strings.NewReader("species=dodo&description=a dumb extinct bird")
-	req, err := http.NewRequest("POST", "/bird", body)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+	mockStore := InitMockStore()
+
+	mockStore.On("CreateBird", &Bird{"eagle", "a sharp eyed bird of prey"}).Return(nil)
+
+	form := newCreateBirdForm()
+	req, err := http.NewRequest("POST", "/birds", bytes.NewBufferString(form.Encode()))
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(form.Encode())))
+	// body := strings.NewReader("species=dodo&description=a dumb extinct bird")
+	// req, err := http.NewRequest("POST", "/bird", body)
+	// req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
 	if err != nil {
 		t.Fatal(err)
@@ -179,6 +212,14 @@ func TestCreateBirdHandler(t *testing.T) {
 	status := recorder.Code
 
 	if status != http.StatusFound {
-		t.Errorf("Status should be 200, got %d", status)
+		t.Errorf("Status should be %d, got %d", http.StatusOK, status)
 	}
+	mockStore.AssertExpectations(t)
+}
+
+func newCreateBirdForm() *url.Values {
+	form := url.Values{}
+	form.Set("species", "eagle")
+	form.Set("description", "a sharp eyed bird of prey")
+	return &form
 }
