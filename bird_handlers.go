@@ -12,7 +12,7 @@ type Bird struct {
 	Description string `json:"description"`
 }
 
-func getBirdHandler(w http.ResponseWriter, r *http.Request) {
+func getBirdsHandler(w http.ResponseWriter, r *http.Request) {
 	//converts the birds variable to json
 	birds, err := store.GetBirds()
 	birdListBytes, err := json.Marshal(birds)
