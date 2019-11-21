@@ -18,7 +18,7 @@
         </tr>
     </table>
     <br/>
-    <form action="/bird" method="post">
+    <form action="/birds" method="post">
         Species:
         <input type="text" name="species">
         <br/> Description:
@@ -28,7 +28,7 @@
     </form>
     <script>
         var birdTable = document.querySelector("table")
-        fetch("/bird")
+        fetch("/birds")
             .then(response => response.json())
             .then(birdList => {
                 birdList.forEach(bird => {

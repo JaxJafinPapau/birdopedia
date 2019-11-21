@@ -12,16 +12,15 @@ type Bird struct {
 	Description string `json:"description"`
 }
 
-// common birds variable
-var birds []Bird
-
-func getBirdHandler(w http.ResponseWriter, r *http.Request) {
+func getBirdsHandler(w http.ResponseWriter, r *http.Request) {
 	//converts the birds variable to json
+	birds, err := store.GetBirds()
 	birdListBytes, err := json.Marshal(birds)
 	// if error, log error to console and return 500
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error: %v", err))
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	// if all is well, write JSON list of birds in response body
 	w.Write(birdListBytes)
@@ -40,8 +39,9 @@ func createBirdHandler(w http.ResponseWriter, r *http.Request) {
 	newBird.Species = r.Form.Get("species")
 	newBird.Description = r.Form.Get("description")
 
-	// Append our existing list of birds with a new bird
-	birds = append(birds, newBird)
+	// Store the new bird in the db
+	err = store.CreateBird(&newBird)
+
 	// Redirect to index
 	http.Redirect(w, r, "/assets/", http.StatusFound)
 }
