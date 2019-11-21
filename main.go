@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 func newRouter() *mux.Router {
@@ -21,8 +23,20 @@ func newRouter() *mux.Router {
 }
 func main() {
 	// This is a constructor function which calls `newRouter`
-	r := newRouter()
+	databaseConn := "dbname=birdopedia sslmode=disable"
+	db, err := sql.Open("postgres", databaseConn)
 
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	InitStore(&dbStore{db: db})
+
+	r := newRouter()
 	http.ListenAndServe(":8080", r)
 }
 
